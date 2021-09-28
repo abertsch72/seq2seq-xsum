@@ -1,0 +1,13 @@
+pytorch, LSTM:
+https://www.kaggle.com/sumantindurkhya/text-summarization-seq2seq-pytorch
+
+pytorch, GRU:
+https://towardsdatascience.com/text-summarization-using-deep-neural-networks-e7ee7521d804
+
+pytorch full impl:
+https://github.com/ymfa/seq2seq-summarizer
+
+keras:
+https://towardsdatascience.com/text-summarization-from-scratch-using-encoder-decoder-network-with-attention-in-keras-5fa80d12710e
+https://www.kaggle.com/sandeepbhogaraju/text-summarization-with-seq2seq-model
+https://medium.com/analytics-vidhya/seq2seq-abstractive-summarization-using-lstm-and-attention-mechanism-code-da2e9c439711
