@@ -11,3 +11,7 @@ keras:
 https://towardsdatascience.com/text-summarization-from-scratch-using-encoder-decoder-network-with-attention-in-keras-5fa80d12710e
 https://www.kaggle.com/sandeepbhogaraju/text-summarization-with-seq2seq-model
 https://medium.com/analytics-vidhya/seq2seq-abstractive-summarization-using-lstm-and-attention-mechanism-code-da2e9c439711
+
+
+using BART:
+https://github.com/pytorch/fairseq/blob/main/examples/bart/README.md
