@@ -64,10 +64,10 @@ class News_Dataset(Dataset):
         # initialize variables
         Articles = []
         Summaries = []
-
+        count = 0
         for d, path, filenames in tqdm(os.walk(self.path)):
             for file in filenames:
-
+                count += 1
                 if os.path.isfile(d + '/' + file):
                     with open(d + '/' + file, 'r', errors='ignore') as f:
                         lines = f.readlines()
@@ -84,12 +84,9 @@ class News_Dataset(Dataset):
                                 lines.pop(0)
                                 Articles.append('\n'.join(lines))
                                 lines = []
-        print("SUMMARIES")
-        for i in range(1):
-            print(Summaries[i])
-        print("ARTICLES")
-        for i in range(1):
-            print(Articles[i])
+                if count > 5000:
+                    break
+
         return zip(Articles, Summaries)
 
     # functions for pre-processing data
@@ -154,12 +151,12 @@ TRG = Field(tokenize=tokenize_en,
 # if you want first dimention to be batch dimension
 # I'm new to this library so I don't have any preference
 # So I'm just sticking to the tutorial mentioned in the reference section
-news_data = News_Dataset(path='../../test-xsum/XSum/XSum-Dataset/xsum-extracts-from-downloads', fields=[SRC,TRG])
+news_data = News_Dataset(path='../../XSum/XSum-Dataset/xsum-extracts-from-downloads', fields=[SRC,TRG])
 
 
 
 # split data into train, validation and test set
-train_data, valid_data, test_data = news_data.split(split_ratio=[0.8,0.1,0.1], random_state=random.seed(21))
+train_data, valid_data, test_data = news_data.split(split_ratio=[0.8, 0.1, 0.1], random_state=random.seed(21))
 
 
 
@@ -173,7 +170,7 @@ print(f"Number of testing examples: {len(test_data.examples)}")
 SRC.build_vocab(train_data, min_freq = 2)
 TRG.build_vocab(train_data, min_freq = 2)
 
-print(vars(train_data.examples[-1]))
+print(TRG.vocab.itos)
 
 
 def get_length_of_tokens(data):
@@ -194,7 +191,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 
-BATCH_SIZE = 100
+BATCH_SIZE = 10
 
 train_iterator, valid_iterator, test_iterator = Iterator.splits(
     (train_data, valid_data, test_data),
@@ -486,11 +483,28 @@ class Seq2Seq_trainer(object):
                     outputs = torch.cat((outputs, torch.argmax(output, -1)), -1)
 
                 # outputs = [trg_len, len(iterator)]
+        print(outputs)
         return torch.transpose(outputs, 0, 1)
 
 # config vaiables
 pad_index = TRG.vocab.stoi[TRG.pad_token]
 # initialize trainer
+torch.cuda.empty_cache()
 trainer = Seq2Seq_trainer(model, train_iterator, valid_iterator, pad_index, device, 1, 1e-3)
 
 trainer.fit(30)
+# evaluate on test data
+test_loss = trainer.evaluate(test_iterator)
+print(f'\t Test. Loss: {test_loss:.3f} |  Test. PPL: {math.exp(test_loss):7.3f}')
+
+
+test_tensor = trainer.predict(test_iterator)
+
+test_out = test_tensor.to('cpu').numpy()
+print(test_out)
+for line in test_out:
+    print("SUMMARY:")
+    for tok in line:
+        print(TRG.vocab.itos[tok], end="")
+
+
